@@ -6,7 +6,7 @@ import Feed from "@/components/feed";
 export default function Home() {
   return (
     <div>
-      <div className="grid grid-cols-12 h-screen w-screen">
+      <div className="grid grid-cols-12 h-screen w-[100%]">
         <div className="col-span-3 border-1">
           <Image
             src={logo}
@@ -15,7 +15,11 @@ export default function Home() {
           />
           <Navbar />
         </div>
-        <div className="col-span-6 border-r-[1px] border-l-[1px] border-gray-400">
+        <div className="col-span-6 border-r-[1px] h-screen overflow-scroll border-l-[1px] border-gray-400">
+          <Feed />
+          <Feed />
+          <Feed />
+          <Feed />
           <Feed />
           <Feed />
           <Feed />

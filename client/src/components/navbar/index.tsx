@@ -49,7 +49,7 @@ const Navbar = () => {
     },
     {
       title: "More Options",
-      icon: <SlOptions />,
+      icon: <SlOptions className="" />,
       link: "/",
     },
   ];
