@@ -18,6 +18,8 @@ const express4_1 = require("@apollo/server/express4");
 const body_parser_1 = __importDefault(require("body-parser"));
 const cors_1 = __importDefault(require("cors"));
 const express_1 = __importDefault(require("express"));
+const user_1 = require("./user");
+const jwt_1 = __importDefault(require("../services/jwt"));
 function initServer() {
     return __awaiter(this, void 0, void 0, function* () {
         const app = (0, express_1.default)();
@@ -25,21 +27,42 @@ function initServer() {
         app.use((0, cors_1.default)());
         const graphqlServer = new server_1.ApolloServer({
             typeDefs: `
+    ${user_1.User.types}
     type Query{
-        sayHello:String
-        sayHelloTome(name:String!):String
+       ${user_1.User.queries}
     } 
     `,
             resolvers: {
-                Query: {
-                    sayHello: () => `Hello from Graphql Server`,
-                    sayHelloTome: (parent, { name }) => `${name}`,
-                },
+                Query: Object.assign({}, user_1.User.resolvers.queries),
             },
+            introspection: process.env.APPLICATION_ENV !== "production",
+            // introspection: true,
         });
         yield graphqlServer.start();
-        app.use("/graphql", (0, express4_1.expressMiddleware)(graphqlServer));
+        app.use("/graphql", (0, express4_1.expressMiddleware)(graphqlServer, {
+            context: ({ req, res }) => __awaiter(this, void 0, void 0, function* () {
+                const user = req.headers.authorization
+                    ? jwt_1.default.decodeToken(req.headers.authorization.split("Bearer ")[1])
+                    : undefined;
+                return { user };
+            }),
+            // context: async ({ req, res }) => {
+            //   const token = req.headers.authorization || "";
+            //   const user = await JWTService.decodeToken(token);
+            //   return { user };
+            // },
+            // context: async ({ req, res }) => {
+            //   return {
+            //     user: req.headers.authorization
+            // ? JWTService.decodeToken(
+            //     req.headers.authorization.split("Bearer ")[1]
+            //   )
+            //       : undefined,
+            //   };
+            // },
+        }));
         return app;
     });
 }
 exports.initServer = initServer;
+// split("Bearer ")[1]
