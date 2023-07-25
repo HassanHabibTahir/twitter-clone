@@ -20,6 +20,7 @@ const cors_1 = __importDefault(require("cors"));
 const express_1 = __importDefault(require("express"));
 const user_1 = require("./user");
 const jwt_1 = __importDefault(require("../services/jwt"));
+const tweet_1 = require("./tweet");
 function initServer() {
     return __awaiter(this, void 0, void 0, function* () {
         const app = (0, express_1.default)();
@@ -28,13 +29,18 @@ function initServer() {
         const graphqlServer = new server_1.ApolloServer({
             typeDefs: `
     ${user_1.User.types}
+    ${tweet_1.Tweet.types}
     type Query{
        ${user_1.User.queries}
+       ${tweet_1.Tweet.queries}
     } 
+
+  type Mutation{
+    ${tweet_1.Tweet.muatations}
+  }
+
     `,
-            resolvers: {
-                Query: Object.assign({}, user_1.User.resolvers.queries),
-            },
+            resolvers: Object.assign(Object.assign({ Query: Object.assign(Object.assign({}, user_1.User.resolvers.queries), tweet_1.Tweet.resolvers.queries), Mutation: Object.assign({}, tweet_1.Tweet.resolvers.mutations) }, tweet_1.Tweet.resolvers.extraResolvers), user_1.User.resolvers.extraResolvers),
             introspection: process.env.APPLICATION_ENV !== "production",
             // introspection: true,
         });
@@ -46,11 +52,6 @@ function initServer() {
                     : undefined;
                 return { user };
             }),
-            // context: async ({ req, res }) => {
-            //   const token = req.headers.authorization || "";
-            //   const user = await JWTService.decodeToken(token);
-            //   return { user };
-            // },
             // context: async ({ req, res }) => {
             //   return {
             //     user: req.headers.authorization

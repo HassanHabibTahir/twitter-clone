@@ -6,7 +6,7 @@ import express from "express";
 import { User } from "./user";
 import JWTService from "../services/jwt";
 import { GraphqlContext } from "../interfaces";
-
+import { Tweet } from "./tweet";
 export async function initServer() {
   const app = express();
   app.use(bodyParser.json());
@@ -15,14 +15,28 @@ export async function initServer() {
   const graphqlServer = new ApolloServer<GraphqlContext>({
     typeDefs: `
     ${User.types}
+    ${Tweet.types}
     type Query{
        ${User.queries}
+       ${Tweet.queries}
     } 
+
+  type Mutation{
+    ${Tweet.muatations}
+  }
+
     `,
     resolvers: {
       Query: {
         ...User.resolvers.queries,
+        ...Tweet.resolvers.queries,
       },
+      Mutation: {
+        ...Tweet.resolvers.mutations,
+        // ...User.resolvers.mutations,
+      },
+      ...Tweet.resolvers.extraResolvers,
+      ...User.resolvers.extraResolvers,
     },
     introspection: process.env.APPLICATION_ENV !== "production",
     // introspection: true,
@@ -37,14 +51,9 @@ export async function initServer() {
               req.headers.authorization.split("Bearer ")[1]
             )
           : undefined;
-
         return { user };
       },
-      // context: async ({ req, res }) => {
-      //   const token = req.headers.authorization || "";
-      //   const user = await JWTService.decodeToken(token);
-      //   return { user };
-      // },
+
       // context: async ({ req, res }) => {
       //   return {
       //     user: req.headers.authorization
