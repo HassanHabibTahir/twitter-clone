@@ -17,6 +17,7 @@
     "@types/react": "18.2.14",
     "@types/react-dom": "18.2.6",
     "autoprefixer": "10.4.14",
+    "axios": "^1.4.0",
     "eslint": "8.44.0",
     "eslint-config-next": "13.4.9",
     "graphql": "^16.7.1",
@@ -33,6 +34,7 @@
   "devDependencies": {
     "@graphql-codegen/cli": "4.0.1",
     "@graphql-codegen/client-preset": "4.0.1",
-    "@graphql-codegen/introspection": "4.0.0"
+    "@graphql-codegen/introspection": "4.0.0",
+    "encoding": "^0.1.13"
   }
 }

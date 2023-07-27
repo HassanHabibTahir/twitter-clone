@@ -18,3 +18,26 @@ export const getCurrentUserQuery = gql`
     }
   }
 `;
+
+// query GetuserById($id: ID!) {
+// getUserById(id: $id) {
+export const getUserByIdQuery = gql`
+  query getUserById($id: ID!) {
+    getUserById(id: $id) {
+      id
+      firstName
+      lastName
+      profileImageUrl
+      email
+      tweets {
+        content
+        id
+        author {
+          lastName
+          firstName
+          profileImageUrl
+        }
+      }
+    }
+  }
+`;

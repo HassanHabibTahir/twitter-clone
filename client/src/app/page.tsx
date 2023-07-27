@@ -5,14 +5,22 @@ import { useCallback, useState } from "react";
 import { useCurrentUser } from "@/hooks/user";
 import { BiImageAlt } from "react-icons/bi";
 import { useCreateTweet, useGetAllTweets } from "@/hooks/tweet";
-import { Tweet } from "@/gql/graphql";
+import {
+  GetSignedUrlQuery,
+  QueryGetSignedUrlForTweetArgs,
+  Tweet,
+} from "@/gql/graphql";
 import Layout from "@/components/layout";
 import toast from "react-hot-toast";
+import { getSignedURLForTweetQuery } from "@/graphql/query/tweet";
+import { graphqlClient } from "@/clients/api";
+import axios from "axios";
 
 export default function Home() {
   const { user } = useCurrentUser();
   const { tweets }: any = useGetAllTweets();
   const [content, setContent] = useState("");
+  const [imageURL, setImageURL] = useState("");
   const { mutateAsync } = useCreateTweet();
 
   const handleInputChangeFile = useCallback((input: HTMLInputElement) => {
@@ -21,28 +29,24 @@ export default function Home() {
       const file: File | null | undefined = input.files?.item(0);
       if (!file) return;
 
-      console.log(file, "file");
+      const { getSignedURLForTweet }: { getSignedURLForTweet: string } =
+        await graphqlClient.request(getSignedURLForTweetQuery, {
+          imageName: file.name,
+          imageType: file.type,
+        });
 
-      // const { getSignedURLForTweet } = await graphqlClient.request(
-      //   getSignedURLForTweetQuery,
-      //   {
-      //     imageName: file.name,
-      //     imageType: file.type,
-      //   }
-      // );
-
-      // if (getSignedURLForTweet) {
-      // toast.loading("Uploading...", { id: "2" });
-      // await axios.put(getSignedURLForTweet, file, {
-      //   headers: {
-      //     "Content-Type": file.type,
-      //   },
-      // });
-      // toast.success("Upload Completed", { id: "2" });
-      // const url = new URL(getSignedURLForTweet);
-      // const myFilePath = `${url.origin}${url.pathname}`;
-      // setImageURL(myFilePath);
-      // }
+      if (getSignedURLForTweet) {
+        toast.loading("Uploading...", { id: "2" });
+        await axios.put(getSignedURLForTweet, file, {
+          headers: {
+            "Content-Type": file.type,
+          },
+        });
+        toast.success("Upload Completed", { id: "2" });
+        const url = new URL(getSignedURLForTweet);
+        const myFilePath = `${url.origin}${url.pathname}`;
+        setImageURL(myFilePath);
+      }
     };
   }, []);
 
@@ -61,10 +65,10 @@ export default function Home() {
   const handleCreateTweet = useCallback(async () => {
     await mutateAsync({
       content,
-      // imageURL,
+      imageURL,
     });
     setContent("");
-    // setImageURL("");
+    setImageURL("");
   }, [mutateAsync, content]);
 
   return (
@@ -90,7 +94,14 @@ export default function Home() {
                 placeholder="What's happening?"
                 rows={3}
               ></textarea>
-
+              {imageURL && (
+                <Image
+                  src={imageURL}
+                  alt="tweet-image"
+                  width={300}
+                  height={300}
+                />
+              )}
               <div className="mt-2 flex justify-between items-center">
                 <BiImageAlt onClick={handleSelectImage} className="text-xl" />
                 <button
